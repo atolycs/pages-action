@@ -109,37 +109,12 @@ try {
 		});
 	};
 
-	const createJobSummary = async ({ deployment, aliasUrl }: { deployment: Deployment; aliasUrl: string }) => {
-		const deployStage = deployment.stages.find((stage) => stage.name === "deploy");
-
-		let status = "⚡️  Deployment in progress...";
-		if (deployStage?.status === "success") {
-			status = "✅  Deploy successful!";
-		} else if (deployStage?.status === "failure") {
-			status = "🚫  Deployment failed";
-		}
-
-		await summary
-			.addRaw(
-				`
-# Deploying with Cloudflare Pages
-
-| Name                    | Result |
-| ----------------------- | - |
-| **Last commit:**        | \`${deployment.deployment_trigger.metadata.commit_hash.substring(0, 8)}\` |
-| **Status**:             | ${status} |
-| **Preview URL**:        | ${deployment.url} |
-| **Branch Preview URL**: | ${aliasUrl} |
-      `
-			)
-			.write();
-	};
-
 	(async () => {
 		const project = await getProject();
 
 		const productionEnvironment = githubBranch === project.production_branch || branch === project.production_branch;
-		const environmentName = `${projectName} (${productionEnvironment ? "Production" : "Preview"})`;
+		// const environmentName = `${projectName} (${productionEnvironment ? "Production" : "Preview"})`;
+		const environmentName = productionEnvironment ? "Production" : "Preview";
 
 		let gitHubDeployment: Awaited<ReturnType<typeof createGitHubDeployment>>;
 
@@ -159,7 +134,7 @@ try {
 		}
 		setOutput("alias", alias);
 
-		await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
+		// await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
 
 		if (gitHubDeployment) {
 			const octokit = getOctokit(gitHubToken);
